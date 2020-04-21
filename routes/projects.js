@@ -3,6 +3,7 @@ const projectController = require('../controllers/projectController')
 const authMiddleware = require('../middleware/auth')
 const { multerUploads } = require('../config/multer')
 const projectMiddleware = require('../middleware/project')
+const mediaController = require('../controllers/mediaController')
 
 const router = express.Router()
 
@@ -21,7 +22,9 @@ router.get('/tags/:tags',
 
 router.post('/create', 
 // authMiddleware.requireJWT, 
-multerUploads, 
+multerUploads,
+projectController.validate,
+mediaController.create,
 projectController.create
 )
 
@@ -34,6 +37,8 @@ projectController.read
 router.put('/:projectId',
 // authMiddleware.requireJWT, 
 multerUploads,
+projectController.validate,
+mediaController.create,
 projectMiddleware.retrieveProject,
 projectController.update
 )

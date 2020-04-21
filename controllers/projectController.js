@@ -1,10 +1,27 @@
-const { uploader } = require('../config/cloudinary')
-const { dataUri } = require('../config/multer')
 const { ProjectModel, validateProject } = require('../models/project')
+
+async function validate(req, res, next) {
+
+  let projectData = {...req.body}
+  projectData.tags = projectData.tags.split(',')
+  projectData.archived = false
+
+  let {error} = validateProject(projectData) 
+  if(error) {
+    let messages = error.details.map((error) => {
+      return error.message
+    })
+    res.status(400).json({message: `${messages.join(". ")}.`})
+    return
+  } else {
+    next()
+  }
+
+}
 
 async function read(req, res, next) {
 
-  let project = await ProjectModel.findById(req.params.projectId)
+  let project = await ProjectModel.findById(req.params.projectId).populate('media', 'url description tags')
   .catch((err) => { 
     res.status(404).json({message: err.message})
     return
@@ -38,7 +55,7 @@ async function listAll(req, res, next) {
 
 async function list(req,res,next) {
 
-  let projects = await ProjectModel.find({archived: false})
+  let projects = await ProjectModel.find({archived: false}).populate('media', 'url description tags')
   .catch((err) => { 
     res.status(404).json({message: err.message})
     return
@@ -57,7 +74,7 @@ async function listTags(req, res, next) {
 
   let queryTags = req.params.tags.split(',')
 
-  let projects = await ProjectModel.find({tags: { $in: queryTags }, archived: false})
+  let projects = await ProjectModel.find({tags: { $in: queryTags }, archived: false}).populate('media', 'url description tags')
   .catch((err) => {
     res.status(404).json({message: err.message})
   })
@@ -75,37 +92,14 @@ async function create(req, res, next) {
 
   let projectData = {...req.body}
   console.log(projectData)
-  // console.log(req)
+
+  projectData.media = req.media.map((item) => {
+    return item._id.toString()
+  })
 
   // Format Tags
   projectData.tags = projectData.tags.split(',')
-  projectData.archived = false
-
-  // Validate Data
-  let {error} = validateProject(projectData) 
-  if(error) {
-    let messages = error.details.map((error) => {
-      return error.message
-    })
-    res.status(400).json({message: `${messages.join(". ")}.`})
-    return
-  }
-
-  // Check for Media and Upload
-  if (req.files.length > 0) {
-    try {
-      projectData.media = []
-      let urls = await upload(req.files, projectData.tags)
-      let media = urls.map((url) => {
-        return { url, featured: false }
-      })
-      projectData.media = media
-    }
-    catch(err) {
-      res.status(400).json({message: err.message})
-      return
-    }
-  }
+  projectData.archived = false;
 
   ({error} = validateProject(projectData))
   if(error) {
@@ -129,49 +123,17 @@ async function create(req, res, next) {
   }
 }
 
-
-async function upload(files, tags) {
-    let uploads = []
-    for(let file of files) {
-      const dataUriFile = dataUri(file).content
-      uploads.push(
-        await uploader.upload(dataUriFile, null, 
-          { 
-            tags: tags, 
-            folder: process.env.CLOUDINARY_FOLDER,
-            resource_type: 'auto'
-          }
-          )
-      )
-    }
-
-    let urls = []
-    return Promise.all(uploads)
-    .then((results => {
-
-      results.map((result) => {
-        urls.push(result.url)
-      })
-      return(urls)
-
-    }))
-    .catch((err) => {
-      throw(err)
-    })
-
-}
-
 async function update(req, res, next) {
 
+  let projectData = {...req.body}
   
 
-  let projectData = {...req.body}
-  let projectMedia = []
-
-  console.log(projectData)
+  let projectMedia = req.media.map((item) => {
+    return item._id.toString()
+  })
 
   projectData.tags = projectData.tags.split(',')
-  
+
   let {error} = validateProject(projectData) 
   if(error) {
     let messages = error.details.map((error) => {
@@ -179,20 +141,6 @@ async function update(req, res, next) {
     })
     res.status(400).json({message: `${messages.join(". ")}.`})
     return
-  }
-
-  if (req.files.length > 0) {
-    try {
-      let urls = await upload(req.files, req.body.project.tags)
-      let media = urls.map((url) => {
-        return { url, featured: false }
-      })
-      projectMedia = media
-    }
-    catch(err) {
-      res.status(400).json({message: err.message})
-      return
-    }
   }
 
   let project = await ProjectModel.findByIdAndUpdate(req.params.projectId, {$set: projectData, $push: {media: projectMedia}}, {new: true, runValidators: true})
@@ -207,17 +155,6 @@ async function update(req, res, next) {
 
 async function destroy(req, res, next) {
 
-  let project = await ProjectModel.findById(req.params.projectId)
-  .catch((err) => { 
-    res.status(404).json({message: err.message})
-    return
-  })
-
-  if (!project) {
-    res.status(404).json({message: "Project not found."})
-    return
-  }
-
   ProjectModel.findByIdAndDelete(req.params.projectId)
   .then((project) => {
     console.log(project)
@@ -228,7 +165,27 @@ async function destroy(req, res, next) {
     return
   })
   
-
 }
 
-module.exports = { create, read, update, destroy, list, listAll, listTags }
+module.exports = { create, read, update, destroy, list, listAll, listTags, validate }
+
+
+// { public_id: 'portfolio/c5drhuwfmo5pxn8me5bq',
+//     version: 1587012030,
+//     signature: '13d56bb54a6b116c6cb09f079998971dcd5a4dc7',
+//     width: 500,
+//     height: 625,
+//     format: 'jpg',
+//     resource_type: 'image',
+//     created_at: '2020-04-16T04:40:30Z',
+//     tags: [ 'jew', 'bob' ],
+//     bytes: 51141,
+//     type: 'upload',
+//     etag: 'bb124b5329d5e8fc12d484ea6f20c9ff',
+//     placeholder: false,
+//     url:
+//      'http://res.cloudinary.com/dqfwgv9dg/image/upload/v1587012030/portfolio/c5drhuwfmo5pxn8me5bq.jpg',
+//     secure_url:
+//      'https://res.cloudinary.com/dqfwgv9dg/image/upload/v1587012030/portfolio/c5drhuwfmo5pxn8me5bq.jpg',
+//     backup_url:
+//      'api.cloudinary.com/v1_1/dqfwgv9dg/resources/86b9036686fa2385715ac1c06bb5ce7c/backup/cbd69b271dc0aaf48d249f43af9bd492' } 

@@ -22,7 +22,7 @@ let mongoURL = ''
   }
 
   mongoose
-      .connect(mongoURL, { useNewUrlParser: true, useCreateIndex: true, useUnifiedTopology: true})
+      .connect(mongoURL, { useFindAndModify: false,  useNewUrlParser: true, useCreateIndex: true, useUnifiedTopology: true})
       .then(() => {
         console.log(`Successfully connected to ${process.env.NODE_ENV} database`)
       })

@@ -3,6 +3,7 @@ const express = require('express')
 const cors = require('cors')
 const auth = require('./routes/auth')
 const projects = require('./routes/projects')
+const media = require('./routes/media')
 const { cloudinaryConfig } = require('./config/cloudinary')
 
 const server = express()
@@ -22,6 +23,7 @@ server.use('*', cloudinaryConfig)
 // Routes
 server.use('/auth', auth)
 server.use('/projects', projects)
+server.use('/media', media)
 
 // MULTER DEBUG
 // server.use(function (err, req, res, next) {

@@ -1,5 +1,6 @@
 const mongoose = require('./init')
 const Joi = require('@hapi/joi')
+Joi.ObjectId = require('joi-objectid')(Joi)
 
 const urlRegex = /(http|ftp|https):\/\/[\w-]+(\.[\w-]+)+([\w.,@?^=%&amp;:\/~+#-]*[\w@?^=%&amp;\/~+#-])?/
 
@@ -26,10 +27,17 @@ const projectSchema = new mongoose.Schema({
   ],
   media: [
     {
-      url: { type: String, match: urlRegex },
-      featured: { type: Boolean, default: false }
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Media" 
     }
   ],
+  featured: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Media",
+    required: true,
+    // TODO: FIX THIS DEFAULT VALUE
+    default: "5e97e1bfa24aacb04916b4bb"
+   },
   link: {
     type: String,
     match: urlRegex
@@ -62,12 +70,10 @@ function validateProject(project) {
       .unique(),
     media: Joi.array()
       .items(
-        Joi.object({
-          url: Joi.string().pattern(urlRegex),
-          featured: Joi.boolean()
-        })
+        Joi.ObjectId()
       )
       .unique(),
+    featured: Joi.ObjectId(),
     link: Joi.string()
       .pattern(urlRegex),
     github: Joi.string()
