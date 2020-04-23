@@ -36,7 +36,7 @@ const projectSchema = new mongoose.Schema({
     ref: "Media",
     required: true,
     // TODO: FIX THIS DEFAULT VALUE
-    default: "5e97e1bfa24aacb04916b4bb"
+    default: "5ea0e30cdd0122df7818792e"
    },
   link: {
     type: String,

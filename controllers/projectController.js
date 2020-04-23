@@ -21,7 +21,24 @@ async function validate(req, res, next) {
 
 async function read(req, res, next) {
 
-  let project = await ProjectModel.findById(req.params.projectId).populate('media', 'url description tags')
+  let project = await ProjectModel.findOne({_id:req.params.projectId, archived: false}).populate('media', 'url description tags').populate('featured', 'url description tags')
+  .catch((err) => { 
+    res.status(404).json({message: err.message})
+    return
+  })
+
+  if (!project) {
+    res.status(404).json({message: "Project not found."})
+    return
+  }
+
+  res.json(project)
+
+}
+
+async function edit(req, res, next){
+
+  let project = await ProjectModel.findById(req.params.projectId).populate('media').populate('featured')
   .catch((err) => { 
     res.status(404).json({message: err.message})
     return
@@ -55,7 +72,7 @@ async function listAll(req, res, next) {
 
 async function list(req,res,next) {
 
-  let projects = await ProjectModel.find({archived: false}).populate('media', 'url description tags')
+  let projects = await ProjectModel.find({archived: false}).populate('media', 'url description tags').populate('featured', 'url description tags')
   .catch((err) => { 
     res.status(404).json({message: err.message})
     return
@@ -72,12 +89,26 @@ async function list(req,res,next) {
 
 async function listTags(req, res, next) {
 
-  let queryTags = req.params.tags.split(',')
+  let projects
 
-  let projects = await ProjectModel.find({tags: { $in: queryTags }, archived: false}).populate('media', 'url description tags')
-  .catch((err) => {
-    res.status(404).json({message: err.message})
-  })
+  if (req.params.tags) {
+
+    let queryTags = req.params.tags.split(',')
+
+    projects = await ProjectModel.find({tags: { $in: queryTags }, archived: false}).populate('media', 'url description tags').populate('featured', 'url description tags')
+    .catch((err) => {
+      res.status(404).json({message: err.message})
+    })
+
+  } else {
+
+    projects = await ProjectModel.find({archived: false}).populate('media', 'url description tags').populate('featured', 'url description tags')
+    .catch((err) => { 
+      res.status(404).json({message: err.message})
+      return
+    })
+
+  }
 
   if (!projects) {
     res.status(404).json({message: "No projects found."})
@@ -167,7 +198,7 @@ async function destroy(req, res, next) {
   
 }
 
-module.exports = { create, read, update, destroy, list, listAll, listTags, validate }
+module.exports = { create, read, update, destroy, list, listAll, listTags, validate, edit }
 
 
 // { public_id: 'portfolio/c5drhuwfmo5pxn8me5bq',

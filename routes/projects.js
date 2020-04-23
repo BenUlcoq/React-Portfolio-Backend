@@ -7,17 +7,17 @@ const mediaController = require('../controllers/mediaController')
 
 const router = express.Router()
 
+router.get('/tags/:tags?',
+  projectController.listTags
+)
+
 router.get('/',
-  projectController.list
+  projectController.listTags
 )
 
 router.get('/all',
   // authMiddleware.requireJWT,
   projectController.listAll
-)
-
-router.get('/tags/:tags',
-  projectController.listTags
 )
 
 router.post('/create', 
@@ -30,7 +30,6 @@ projectController.create
 
 router.get('/:projectId',
 // authMiddleware.requireJWT, 
-projectMiddleware.retrieveProject,
 projectController.read
 )
 
@@ -47,6 +46,11 @@ router.delete('/:projectId',
 // authMiddleware.requireJWT,
 projectMiddleware.retrieveProject, 
 projectController.destroy
+)
+
+router.get('/admin/:projectId',
+// authMiddleware.requireJWT, 
+projectController.edit
 )
 
 
