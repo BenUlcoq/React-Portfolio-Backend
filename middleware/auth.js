@@ -1,7 +1,7 @@
 const passport = require('passport')
 const JWT = require('jsonwebtoken')
 const PassportJwt = require('passport-jwt')
-const User = require('../models/User')
+const User = require('../models/user')
 
 // These should be in .env
 // secret (generated using `openssl rand -base64 48` from console)
