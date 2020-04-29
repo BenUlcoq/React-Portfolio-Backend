@@ -32,7 +32,14 @@ server.use('/media', media)
 // })
 
 // Start the server
-server.listen(3001, error => {
+if (process.env.NODE_ENV === 'production') {
+server.listen(process.env.PORT, error => {
   if (error) console.error('Error starting', error)
-  else console.log('Started at http://localhost:3001')
+  else console.log(`Started at ${process.env.PORT}`)
 })
+} else {
+  server.listen(3001, error => {
+    if (error) console.error('Error starting', error)
+    else console.log(`Started at ${process.env.PORT}`)
+  })
+}
