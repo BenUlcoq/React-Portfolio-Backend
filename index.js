@@ -8,10 +8,17 @@ const { cloudinaryConfig } = require('./config/cloudinary')
 
 const server = express()
 
-server.use(cors({
-  origin: "http://localhost:3000",
-  credentials: true
-}))
+if( process.env.NODE_ENV === 'production') {
+  server.use(cors({
+    origin: process.env.CLIENT_URL,
+    credentials: true
+  }))
+} else {
+  server.use(cors({
+    origin: "http://localhost:3000",
+    credentials: true
+  }))
+}
 
 
 // Middleware Plugins

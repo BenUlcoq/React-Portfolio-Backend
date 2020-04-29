@@ -16,12 +16,12 @@ router.get('/',
 )
 
 router.get('/all',
-  // authMiddleware.requireJWT,
+  authMiddleware.requireJWT,
   projectController.listAll
 )
 
 router.post('/create', 
-// authMiddleware.requireJWT, 
+authMiddleware.requireJWT, 
 multerUploads,
 projectController.validate,
 mediaController.create,
@@ -29,12 +29,12 @@ projectController.create
 )
 
 router.get('/:projectId',
-// authMiddleware.requireJWT, 
+authMiddleware.requireJWT, 
 projectController.read
 )
 
 router.put('/:projectId',
-// authMiddleware.requireJWT, 
+authMiddleware.requireJWT, 
 multerUploads,
 projectController.validate,
 mediaController.create,
@@ -43,30 +43,14 @@ projectController.update
 )
 
 router.delete('/:projectId',
-// authMiddleware.requireJWT,
+authMiddleware.requireJWT,
 projectMiddleware.retrieveProject, 
 projectController.destroy
 )
 
 router.get('/admin/:projectId',
-// authMiddleware.requireJWT, 
+authMiddleware.requireJWT, 
 projectController.edit
 )
-
-
-
-
-
-// router.post('/upload',
-// multerUploads, (req, res) => {
-
-//   console.log('req.body :', req.body)
-
-//   console.log('req.files', req.files)
-
-//   res.send('yeeting')
-
-// })
-
 
 module.exports = router

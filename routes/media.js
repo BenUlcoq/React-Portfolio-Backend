@@ -6,27 +6,27 @@ const mediaController = require('../controllers/mediaController')
 const router = express.Router()
 
 router.get('/',
-  // authMiddleware.requireJWT,
+  authMiddleware.requireJWT,
   mediaController.list
 )
 
 router.get('/:mediaId',
-  // authMiddleware.requireJWT,
+  authMiddleware.requireJWT,
   mediaController.read
 )
 
 router.delete('/:mediaId',
-  // authMiddleware.requireJWT,
+  authMiddleware.requireJWT,
   mediaController.destroy
 )
 
 router.put('/:mediaId',
-  // authMiddleware.requireJWT,
+  authMiddleware.requireJWT,
   mediaController.update
 )
 
 router.post('/',
-  // authMiddleware.requireJWT,
+  authMiddleware.requireJWT,
   multerUploads,
   mediaController.create
 )
