@@ -11,6 +11,12 @@ const projectSchema = new mongoose.Schema({
     minlength: 1,
     maxlength: 255
   },
+  subtitle: {
+    type: String,
+    required: true,
+    minlength: 1,
+    maxlength: 255
+  },
   description: {
     type: String,
     required: true
@@ -28,7 +34,7 @@ const projectSchema = new mongoose.Schema({
   media: [
     {
         type: mongoose.Schema.Types.ObjectId,
-        ref: "Media" 
+        ref: "Media",
     }
   ],
   featured: {
@@ -60,8 +66,11 @@ function validateProject(project) {
     title: Joi.string()
       .required()
       .min(1)
-      .max(255)
-      ,
+      .max(255),
+    subtitle: Joi.string()
+      .required()
+      .min(1)
+      .max(255),
     description: Joi.string()
       .required(),
     create_date: Joi.date(),

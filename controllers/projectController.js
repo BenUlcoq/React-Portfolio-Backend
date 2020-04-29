@@ -157,11 +157,13 @@ async function create(req, res, next) {
 async function update(req, res, next) {
 
   let projectData = {...req.body}
-  
+  let projectMedia
 
-  let projectMedia = req.media.map((item) => {
-    return item._id.toString()
-  })
+  if (req.media) {
+    projectMedia = req.media.map((item) => {
+      return item._id.toString()
+    })
+  }
 
   projectData.tags = projectData.tags.split(',')
 
@@ -174,13 +176,25 @@ async function update(req, res, next) {
     return
   }
 
-  let project = await ProjectModel.findByIdAndUpdate(req.params.projectId, {$set: projectData, $push: {media: projectMedia}}, {new: true, runValidators: true})
-  .catch((err) => { 
-    res.status(400).json({message: err.message})
-    return
-  })
+  if ( projectMedia ) {
+    let project = await ProjectModel.findByIdAndUpdate(req.params.projectId, {$set: projectData, $push: {media: projectMedia}}, {new: true, runValidators: true})
+    .catch((err) => { 
+      res.status(400).json({message: err.message})
+      return
+    })
 
-  res.json(project)
+    res.json(project)
+  } else {
+    let project = await ProjectModel.findByIdAndUpdate(req.params.projectId, {$set: projectData}, {new: true, runValidators: true})
+    .catch((err) => { 
+      res.status(400).json({message: err.message})
+      return
+    })
+
+    res.json(project)
+  }
+
+  
 
 }
 
