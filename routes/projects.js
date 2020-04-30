@@ -29,7 +29,6 @@ projectController.create
 )
 
 router.get('/:projectId',
-authMiddleware.requireJWT, 
 projectController.read
 )
 
