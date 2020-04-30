@@ -6,6 +6,7 @@ const router = express.Router()
 // Register
 router.post(
   '/register',
+  authMiddleware.requireJWT,
   // middleware that handles the registration process
   authMiddleware.register,
   // json handler
